@@ -6,11 +6,12 @@ import BalanceCard from '@/components/BalanceCard';
 import TransactionForms from '@/components/TransactionForms';
 import TransactionHistory from '@/components/TransactionHistory';
 import PasswordModal from '@/components/PasswordModal';
+import AdminModal from '@/components/AdminModal';
 import QuickStats from '@/components/QuickStats';
 
 interface Transaction {
   id: number;
-  type: 'deposit' | 'withdrawal';
+  type: 'deposit' | 'withdrawal' | 'transfer';
   amount: number;
   date: string;
   time: string;
@@ -21,10 +22,15 @@ const Index = () => {
   const [balance, setBalance] = useState(2500.75);
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [transferAmount, setTransferAmount] = useState('');
+  const [recipientAccount, setRecipientAccount] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
   const [password, setPassword] = useState('');
-  const [pendingTransaction, setPendingTransaction] = useState<{type: 'deposit' | 'withdrawal', amount: number} | null>(null);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [pendingTransaction, setPendingTransaction] = useState<{type: 'deposit' | 'withdrawal' | 'transfer', amount: number, recipientAccount?: string} | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: 1,
@@ -44,11 +50,11 @@ const Index = () => {
     },
     {
       id: 3,
-      type: 'deposit',
+      type: 'transfer',
       amount: 500,
       date: '2024-06-07',
       time: '16:45',
-      description: 'Mobile Check Deposit'
+      description: 'Transfer to Account ****5678'
     }
   ]);
 
@@ -57,7 +63,7 @@ const Index = () => {
     document.documentElement.classList.toggle('dark');
   };
 
-  const initiateTransaction = (type: 'deposit' | 'withdrawal', amount: string) => {
+  const initiateTransaction = (type: 'deposit' | 'withdrawal' | 'transfer', amount: string, recipientAccount?: string) => {
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       toast({
@@ -68,16 +74,25 @@ const Index = () => {
       return;
     }
 
-    if (type === 'withdrawal' && parsedAmount > balance) {
+    if ((type === 'withdrawal' || type === 'transfer') && parsedAmount > balance) {
       toast({
         title: "Insufficient Funds",
-        description: "You don't have enough balance for this withdrawal.",
+        description: "You don't have enough balance for this transaction.",
         variant: "destructive",
       });
       return;
     }
 
-    setPendingTransaction({ type, amount: parsedAmount });
+    if (type === 'transfer' && !recipientAccount) {
+      toast({
+        title: "Missing Account Number",
+        description: "Please enter a recipient account number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPendingTransaction({ type, amount: parsedAmount, recipientAccount });
     setShowPasswordModal(true);
   };
 
@@ -93,30 +108,52 @@ const Index = () => {
 
     if (!pendingTransaction) return;
 
-    const { type, amount } = pendingTransaction;
+    const { type, amount, recipientAccount } = pendingTransaction;
     
+    let description = '';
+    if (type === 'deposit') {
+      description = 'Mobile App Deposit';
+    } else if (type === 'withdrawal') {
+      description = 'Mobile App Withdrawal';
+    } else if (type === 'transfer') {
+      description = `Transfer to Account ****${recipientAccount?.slice(-4)}`;
+    }
+
     const newTransaction: Transaction = {
       id: transactions.length + 1,
       type,
       amount,
       date: new Date().toISOString().split('T')[0],
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      description: `Mobile App ${type === 'deposit' ? 'Deposit' : 'Withdrawal'}`
+      description
     };
 
     if (type === 'deposit') {
       setBalance(prev => prev + amount);
       setDepositAmount('');
-    } else {
+    } else if (type === 'withdrawal') {
       setBalance(prev => prev - amount);
       setWithdrawAmount('');
+    } else if (type === 'transfer') {
+      setBalance(prev => prev - amount);
+      setTransferAmount('');
+      setRecipientAccount('');
     }
 
     setTransactions(prev => [newTransaction, ...prev]);
     
+    let successMessage = '';
+    if (type === 'deposit') {
+      successMessage = `$${amount.toFixed(2)} has been deposited to your account.`;
+    } else if (type === 'withdrawal') {
+      successMessage = `$${amount.toFixed(2)} has been withdrawn from your account.`;
+    } else if (type === 'transfer') {
+      successMessage = `$${amount.toFixed(2)} has been transferred to account ****${recipientAccount?.slice(-4)}.`;
+    }
+
     toast({
-      title: `${type === 'deposit' ? 'Deposit' : 'Withdrawal'} Successful!`,
-      description: `$${amount.toFixed(2)} has been ${type === 'deposit' ? 'deposited to' : 'withdrawn from'} your account.`,
+      title: `${type.charAt(0).toUpperCase() + type.slice(1)} Successful!`,
+      description: successMessage,
     });
 
     // Reset modal state
@@ -129,6 +166,27 @@ const Index = () => {
     setShowPasswordModal(false);
     setPassword('');
     setPendingTransaction(null);
+  };
+
+  const handleAdminAccess = () => {
+    setShowAdminModal(true);
+  };
+
+  const handleAdminLogin = () => {
+    setIsAdminLoggedIn(true);
+    setAdminPassword('');
+  };
+
+  const handleAdminClose = () => {
+    setShowAdminModal(false);
+    setIsAdminLoggedIn(false);
+    setAdminPassword('');
+  };
+
+  const handleDeposit = () => {
+    initiateTransaction('deposit', depositAmount);
+    setShowAdminModal(false);
+    setIsAdminLoggedIn(false);
   };
 
   return (
@@ -149,17 +207,33 @@ const Index = () => {
         isDarkMode={isDarkMode}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <AdminModal
+        isOpen={showAdminModal}
+        onClose={handleAdminClose}
+        adminPassword={adminPassword}
+        setAdminPassword={setAdminPassword}
+        onAdminLogin={handleAdminLogin}
+        isAdminLoggedIn={isAdminLoggedIn}
+        depositAmount={depositAmount}
+        setDepositAmount={setDepositAmount}
+        onDeposit={handleDeposit}
+        isDarkMode={isDarkMode}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <BalanceCard balance={balance} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           <TransactionForms
-            depositAmount={depositAmount}
-            setDepositAmount={setDepositAmount}
             withdrawAmount={withdrawAmount}
             setWithdrawAmount={setWithdrawAmount}
-            onDeposit={() => initiateTransaction('deposit', depositAmount)}
+            transferAmount={transferAmount}
+            setTransferAmount={setTransferAmount}
+            recipientAccount={recipientAccount}
+            setRecipientAccount={setRecipientAccount}
             onWithdraw={() => initiateTransaction('withdrawal', withdrawAmount)}
+            onTransfer={() => initiateTransaction('transfer', transferAmount, recipientAccount)}
+            onAdminAccess={handleAdminAccess}
             isDarkMode={isDarkMode}
           />
 
