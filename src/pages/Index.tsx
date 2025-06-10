@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 import BankingHeader from '@/components/BankingHeader';
@@ -19,6 +18,7 @@ interface Transaction {
 }
 
 const Index = () => {
+  
   const [balance, setBalance] = useState(2500.75);
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
