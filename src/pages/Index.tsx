@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Banknote, Coins, History, MessageSquare } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Banknote, Coins, History, Moon, Sun, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Transaction {
@@ -20,6 +21,10 @@ const Index = () => {
   const [balance, setBalance] = useState(2500.75);
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState('');
+  const [pendingTransaction, setPendingTransaction] = useState<{type: 'deposit' | 'withdrawal', amount: number} | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: 1,
@@ -47,48 +52,23 @@ const Index = () => {
     }
   ]);
 
-  const handleDeposit = () => {
-    const amount = parseFloat(depositAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid deposit amount.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newTransaction: Transaction = {
-      id: transactions.length + 1,
-      type: 'deposit',
-      amount,
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      description: 'Mobile App Deposit'
-    };
-
-    setBalance(prev => prev + amount);
-    setTransactions(prev => [newTransaction, ...prev]);
-    setDepositAmount('');
-
-    toast({
-      title: "Deposit Successful!",
-      description: `$${amount.toFixed(2)} has been deposited to your account.`,
-    });
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle('dark');
   };
 
-  const handleWithdraw = () => {
-    const amount = parseFloat(withdrawAmount);
-    if (isNaN(amount) || amount <= 0) {
+  const initiateTransaction = (type: 'deposit' | 'withdrawal', amount: string) => {
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
       toast({
         title: "Invalid Amount",
-        description: "Please enter a valid withdrawal amount.",
+        description: `Please enter a valid ${type} amount.`,
         variant: "destructive",
       });
       return;
     }
 
-    if (amount > balance) {
+    if (type === 'withdrawal' && parsedAmount > balance) {
       toast({
         title: "Insufficient Funds",
         description: "You don't have enough balance for this withdrawal.",
@@ -97,43 +77,160 @@ const Index = () => {
       return;
     }
 
+    setPendingTransaction({ type, amount: parsedAmount });
+    setShowPasswordModal(true);
+  };
+
+  const verifyPassword = () => {
+    if (password !== '1234') {
+      toast({
+        title: "Invalid Password",
+        description: "Please enter the correct password to proceed.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!pendingTransaction) return;
+
+    const { type, amount } = pendingTransaction;
+    
     const newTransaction: Transaction = {
       id: transactions.length + 1,
-      type: 'withdrawal',
+      type,
       amount,
       date: new Date().toISOString().split('T')[0],
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      description: 'Mobile App Withdrawal'
+      description: `Mobile App ${type === 'deposit' ? 'Deposit' : 'Withdrawal'}`
     };
 
-    setBalance(prev => prev - amount);
-    setTransactions(prev => [newTransaction, ...prev]);
-    setWithdrawAmount('');
+    if (type === 'deposit') {
+      setBalance(prev => prev + amount);
+      setDepositAmount('');
+    } else {
+      setBalance(prev => prev - amount);
+      setWithdrawAmount('');
+    }
 
+    setTransactions(prev => [newTransaction, ...prev]);
+    
     toast({
-      title: "Withdrawal Successful!",
-      description: `$${amount.toFixed(2)} has been withdrawn from your account.`,
+      title: `${type === 'deposit' ? 'Deposit' : 'Withdrawal'} Successful!`,
+      description: `$${amount.toFixed(2)} has been ${type === 'deposit' ? 'deposited to' : 'withdrawn from'} your account.`,
     });
+
+    // Reset modal state
+    setShowPasswordModal(false);
+    setPassword('');
+    setPendingTransaction(null);
+  };
+
+  const cancelTransaction = () => {
+    setShowPasswordModal(false);
+    setPassword('');
+    setPendingTransaction(null);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-50 via-white to-blue-50'
+    }`}>
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className={`shadow-sm border-b transition-colors duration-300 ${
+        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <div className="bg-blue-600 p-2 rounded-lg">
                 <Banknote className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">SecureBank</h1>
+              <h1 className={`text-2xl font-bold transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>SecureBank</h1>
             </div>
-            <div className="text-sm text-gray-500">
-              Welcome back, John Doe
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Sun className={`h-4 w-4 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-yellow-500'
+                }`} />
+                <Switch
+                  checked={isDarkMode}
+                  onCheckedChange={toggleDarkMode}
+                />
+                <Moon className={`h-4 w-4 transition-colors duration-300 ${
+                  isDarkMode ? 'text-blue-400' : 'text-gray-400'
+                }`} />
+              </div>
+              <div className={`text-sm transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-500'
+              }`}>
+                Welcome back, John Doe
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className={`w-96 transition-colors duration-300 ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+          }`}>
+            <CardHeader>
+              <CardTitle className={`flex items-center space-x-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                <Lock className="h-5 w-5 text-blue-600" />
+                <span>Verify Transaction</span>
+              </CardTitle>
+              <CardDescription className={`transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>
+                Enter your password to confirm the {pendingTransaction?.type} of ${pendingTransaction?.amount.toFixed(2)}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="password" className={`transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                }`}>Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`mt-1 transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
+                  }`}
+                />
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={verifyPassword} 
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  disabled={!password}
+                >
+                  Confirm
+                </Button>
+                <Button 
+                  onClick={cancelTransaction} 
+                  variant="outline"
+                  className={`flex-1 transition-colors duration-300 ${
+                    isDarkMode ? 'border-gray-600 text-gray-200 hover:bg-gray-700' : ''
+                  }`}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -153,28 +250,38 @@ const Index = () => {
           {/* Transaction Actions */}
           <div className="space-y-6">
             {/* Deposit Card */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card className={`shadow-lg hover:shadow-xl transition-all duration-300 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+            }`}>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className={`flex items-center space-x-2 transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
                   <Coins className="h-5 w-5 text-green-600" />
                   <span>Make a Deposit</span>
                 </CardTitle>
-                <CardDescription>Add money to your account</CardDescription>
+                <CardDescription className={`transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>Add money to your account</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="deposit">Amount</Label>
+                  <Label htmlFor="deposit" className={`transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Amount</Label>
                   <Input
                     id="deposit"
                     type="number"
                     placeholder="Enter amount"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
-                    className="mt-1"
+                    className={`mt-1 transition-colors duration-300 ${
+                      isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
+                    }`}
                   />
                 </div>
                 <Button 
-                  onClick={handleDeposit} 
+                  onClick={() => initiateTransaction('deposit', depositAmount)} 
                   className="w-full bg-green-600 hover:bg-green-700"
                   disabled={!depositAmount}
                 >
@@ -184,28 +291,38 @@ const Index = () => {
             </Card>
 
             {/* Withdraw Card */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card className={`shadow-lg hover:shadow-xl transition-all duration-300 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+            }`}>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className={`flex items-center space-x-2 transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
                   <Banknote className="h-5 w-5 text-red-600" />
                   <span>Make a Withdrawal</span>
                 </CardTitle>
-                <CardDescription>Withdraw money from your account</CardDescription>
+                <CardDescription className={`transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>Withdraw money from your account</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="withdraw">Amount</Label>
+                  <Label htmlFor="withdraw" className={`transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Amount</Label>
                   <Input
                     id="withdraw"
                     type="number"
                     placeholder="Enter amount"
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}
-                    className="mt-1"
+                    className={`mt-1 transition-colors duration-300 ${
+                      isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
+                    }`}
                   />
                 </div>
                 <Button 
-                  onClick={handleWithdraw} 
+                  onClick={() => initiateTransaction('withdrawal', withdrawAmount)} 
                   className="w-full bg-red-600 hover:bg-red-700"
                   disabled={!withdrawAmount}
                 >
@@ -216,20 +333,28 @@ const Index = () => {
           </div>
 
           {/* Transaction History */}
-          <Card className="shadow-lg">
+          <Card className={`shadow-lg transition-all duration-300 ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+          }`}>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className={`flex items-center space-x-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
                 <History className="h-5 w-5 text-blue-600" />
                 <span>Recent Transactions</span>
               </CardTitle>
-              <CardDescription>Your latest account activity</CardDescription>
+              <CardDescription className={`transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>Your latest account activity</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {transactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                    className={`flex items-center justify-between p-4 rounded-lg hover:opacity-80 transition-all duration-200 ${
+                      isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+                    }`}
                   >
                     <div className="flex items-center space-x-3">
                       <div className={`p-2 rounded-full ${
@@ -244,10 +369,14 @@ const Index = () => {
                         )}
                       </div>
                       <div>
-                        <div className="font-medium text-gray-900">
+                        <div className={`font-medium transition-colors duration-300 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>
                           {transaction.description}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className={`text-sm transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                           {transaction.date} at {transaction.time}
                         </div>
                       </div>
@@ -268,30 +397,42 @@ const Index = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <Card className="text-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card className={`text-center shadow-lg hover:shadow-xl transition-all duration-300 ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+          }`}>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-blue-600 mb-2">
                 {transactions.filter(t => t.type === 'deposit').length}
               </div>
-              <div className="text-sm text-gray-600">Total Deposits</div>
+              <div className={`text-sm transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>Total Deposits</div>
             </CardContent>
           </Card>
           
-          <Card className="text-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card className={`text-center shadow-lg hover:shadow-xl transition-all duration-300 ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+          }`}>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-red-600 mb-2">
                 {transactions.filter(t => t.type === 'withdrawal').length}
               </div>
-              <div className="text-sm text-gray-600">Total Withdrawals</div>
+              <div className={`text-sm transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>Total Withdrawals</div>
             </CardContent>
           </Card>
           
-          <Card className="text-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card className={`text-center shadow-lg hover:shadow-xl transition-all duration-300 ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+          }`}>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-green-600 mb-2">
                 ${transactions.filter(t => t.type === 'deposit').reduce((sum, t) => sum + t.amount, 0).toFixed(2)}
               </div>
-              <div className="text-sm text-gray-600">Total Deposited</div>
+              <div className={`text-sm transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>Total Deposited</div>
             </CardContent>
           </Card>
         </div>
