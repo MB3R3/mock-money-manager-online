@@ -4,8 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Banknote, Settings } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Banknote } from "lucide-react";
 import TransferForm from './TransferForm';
 
 interface TransactionFormsProps {
@@ -113,30 +112,6 @@ const TransactionForms = ({
         setTransferDescription={setTransferDescription}
         isDarkMode={isDarkMode}
       />
-
-      {/* Admin Access Card */}
-      <Card className={`shadow-lg hover:shadow-xl transition-all duration-300 ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
-      }`}>
-        <CardHeader className="pb-4">
-          <CardTitle className={`flex items-center space-x-2 text-lg sm:text-xl transition-colors duration-300 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
-            <Settings className="h-5 w-5 text-purple-600" />
-            <span>Admin Access</span>
-          </CardTitle>
-          <CardDescription className={`transition-colors duration-300 ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-600'
-          }`}>Access admin features</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Link to="/admin">
-            <Button className="w-full bg-purple-600 hover:bg-purple-700">
-              Go to Admin Panel
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
     </div>
   );
 };
