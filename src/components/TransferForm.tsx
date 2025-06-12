@@ -11,6 +11,8 @@ interface TransferFormProps {
   setTransferAmount: (value: string) => void;
   recipientAccount: string;
   setRecipientAccount: (value: string) => void;
+  transferDescription: string;
+  setTransferDescription: (value: string) => void;
   onTransfer: () => void;
   isDarkMode: boolean;
 }
@@ -20,6 +22,8 @@ const TransferForm = ({
   setTransferAmount,
   recipientAccount,
   setRecipientAccount,
+  transferDescription,
+  setTransferDescription,
   onTransfer,
   isDarkMode
 }: TransferFormProps) => {
@@ -69,10 +73,25 @@ const TransferForm = ({
             }`}
           />
         </div>
+        <div>
+          <Label htmlFor="transferDescription" className={`transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-200' : 'text-gray-700'
+          }`}>Description</Label>
+          <Input
+            id="transferDescription"
+            type="text"
+            placeholder="Enter transaction description"
+            value={transferDescription}
+            onChange={(e) => setTransferDescription(e.target.value)}
+            className={`mt-1 transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
+            }`}
+          />
+        </div>
         <Button 
           onClick={onTransfer} 
           className="w-full bg-blue-600 hover:bg-blue-700"
-          disabled={!transferAmount || !recipientAccount}
+          disabled={!transferAmount || !recipientAccount || !transferDescription}
         >
           Transfer Funds
         </Button>

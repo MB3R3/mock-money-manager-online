@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Banknote, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 import TransferForm from './TransferForm';
 
 interface TransactionFormsProps {
@@ -14,9 +15,8 @@ interface TransactionFormsProps {
   setTransferAmount: (value: string) => void;
   recipientAccount: string;
   setRecipientAccount: (value: string) => void;
-  onWithdraw: () => void;
-  onTransfer: () => void;
-  onAdminAccess: () => void;
+  onWithdraw: (description: string) => void;
+  onTransfer: (description: string) => void;
   isDarkMode: boolean;
 }
 
@@ -29,9 +29,21 @@ const TransactionForms = ({
   setRecipientAccount,
   onWithdraw,
   onTransfer,
-  onAdminAccess,
   isDarkMode
 }: TransactionFormsProps) => {
+  const [withdrawDescription, setWithdrawDescription] = useState('');
+  const [transferDescription, setTransferDescription] = useState('');
+
+  const handleWithdraw = () => {
+    onWithdraw(withdrawDescription);
+    setWithdrawDescription('');
+  };
+
+  const handleTransfer = () => {
+    onTransfer(transferDescription);
+    setTransferDescription('');
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Withdraw Card */}
@@ -65,10 +77,25 @@ const TransactionForms = ({
               }`}
             />
           </div>
+          <div>
+            <Label htmlFor="withdrawDescription" className={`transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-200' : 'text-gray-700'
+            }`}>Description</Label>
+            <Input
+              id="withdrawDescription"
+              type="text"
+              placeholder="Enter transaction description"
+              value={withdrawDescription}
+              onChange={(e) => setWithdrawDescription(e.target.value)}
+              className={`mt-1 transition-colors duration-300 ${
+                isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
+              }`}
+            />
+          </div>
           <Button 
-            onClick={onWithdraw} 
+            onClick={handleWithdraw} 
             className="w-full bg-red-600 hover:bg-red-700"
-            disabled={!withdrawAmount}
+            disabled={!withdrawAmount || !withdrawDescription}
           >
             Withdraw Funds
           </Button>
@@ -81,7 +108,9 @@ const TransactionForms = ({
         setTransferAmount={setTransferAmount}
         recipientAccount={recipientAccount}
         setRecipientAccount={setRecipientAccount}
-        onTransfer={onTransfer}
+        onTransfer={handleTransfer}
+        transferDescription={transferDescription}
+        setTransferDescription={setTransferDescription}
         isDarkMode={isDarkMode}
       />
 
@@ -101,12 +130,11 @@ const TransactionForms = ({
           }`}>Access admin features</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button 
-            onClick={onAdminAccess} 
-            className="w-full bg-purple-600 hover:bg-purple-700"
-          >
-            Access Admin Panel
-          </Button>
+          <Link to="/admin">
+            <Button className="w-full bg-purple-600 hover:bg-purple-700">
+              Go to Admin Panel
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>
