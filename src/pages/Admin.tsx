@@ -1,23 +1,91 @@
-
 import React, { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Coins, ArrowLeft } from "lucide-react";
+import { Coins, ArrowLeft, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+
+interface User {
+  id: number;
+  Name: string | null;
+  balance: number | null;
+  account_number: number | null;
+}
 
 const Admin = () => {
   const [depositAmount, setDepositAmount] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
+  const [userIdentifier, setUserIdentifier] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const handleDeposit = () => {
-    if (!depositAmount || !accountNumber || !description) {
+  const searchUser = async () => {
+    if (!userIdentifier) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all fields.",
+        description: "Please enter a user ID or account number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // Try to find user by ID first, then by account number
+      let query = supabase.from('Users').select('*');
+      
+      const isNumeric = /^\d+$/.test(userIdentifier);
+      if (isNumeric) {
+        const numValue = parseInt(userIdentifier);
+        // If it's a reasonable ID range, search by ID first
+        if (numValue < 1000) {
+          query = query.eq('id', numValue);
+        } else {
+          // Otherwise search by account number
+          query = query.eq('account_number', numValue);
+        }
+      } else {
+        // Search by name if not numeric
+        query = query.ilike('Name', `%${userIdentifier}%`);
+      }
+
+      const { data, error } = await query.single();
+
+      if (error || !data) {
+        toast({
+          title: "User Not Found",
+          description: "No user found with that identifier.",
+          variant: "destructive",
+        });
+        setSelectedUser(null);
+        return;
+      }
+
+      setSelectedUser(data);
+      toast({
+        title: "User Found",
+        description: `Found: ${data.Name} (Account: ${data.account_number})`,
+      });
+    } catch (error) {
+      console.error('Search error:', error);
+      toast({
+        title: "Search Error",
+        description: "There was an error searching for the user.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleDeposit = async () => {
+    if (!depositAmount || !selectedUser || !description) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all fields and select a user.",
         variant: "destructive",
       });
       return;
@@ -33,16 +101,61 @@ const Admin = () => {
       return;
     }
 
-    // For now, just show success message
-    // This will be connected to the database when Supabase is integrated
-    toast({
-      title: "Deposit Successful!",
-      description: `$${amount.toFixed(2)} has been deposited to account ${accountNumber}.`,
-    });
+    try {
+      // Create transaction record
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: selectedUser.id,
+          type: 'deposit',
+          amount,
+          description: `Admin Deposit: ${description}`
+        });
 
-    setDepositAmount('');
-    setAccountNumber('');
-    setDescription('');
+      if (transactionError) {
+        console.error('Transaction error:', transactionError);
+        toast({
+          title: "Deposit Failed",
+          description: "There was an error creating the transaction record.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Update user balance
+      const newBalance = (selectedUser.balance || 0) + amount;
+      const { error: balanceError } = await supabase
+        .from('Users')
+        .update({ balance: newBalance })
+        .eq('id', selectedUser.id);
+
+      if (balanceError) {
+        console.error('Balance update error:', balanceError);
+        toast({
+          title: "Deposit Failed",
+          description: "There was an error updating the user's balance.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Deposit Successful!",
+        description: `$${amount.toFixed(2)} has been deposited to ${selectedUser.Name}'s account.`,
+      });
+
+      // Update the selected user's balance in the UI
+      setSelectedUser({ ...selectedUser, balance: newBalance });
+      setDepositAmount('');
+      setDescription('');
+    } catch (error) {
+      console.error('Deposit error:', error);
+      toast({
+        title: "Deposit Failed",
+        description: "There was an unexpected error. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -64,6 +177,49 @@ const Admin = () => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-6">
+              {/* User Search Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Search className="h-5 w-5 text-blue-600" />
+                    <span>Find User</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Search by User ID, Account Number, or Name
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex space-x-2">
+                    <Input
+                      placeholder="Enter User ID, Account Number, or Name"
+                      value={userIdentifier}
+                      onChange={(e) => setUserIdentifier(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={searchUser}
+                      disabled={isSearching}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isSearching ? 'Searching...' : 'Search'}
+                    </Button>
+                  </div>
+                  
+                  {selectedUser && (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <h4 className="font-semibold text-green-800">Selected User:</h4>
+                      <p className="text-green-700">
+                        <strong>Name:</strong> {selectedUser.Name}<br />
+                        <strong>Account Number:</strong> {selectedUser.account_number}<br />
+                        <strong>Current Balance:</strong> ${(selectedUser.balance || 0).toFixed(2)}<br />
+                        <strong>User ID:</strong> {selectedUser.id}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Deposit Section */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -71,21 +227,10 @@ const Admin = () => {
                     <span>Deposit to User Account</span>
                   </CardTitle>
                   <CardDescription>
-                    Add money to any user's account
+                    Add money to the selected user's account
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="accountNumber">Account Number</Label>
-                    <Input
-                      id="accountNumber"
-                      type="text"
-                      placeholder="Enter user account number"
-                      value={accountNumber}
-                      onChange={(e) => setAccountNumber(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
                   <div>
                     <Label htmlFor="depositAmount">Amount</Label>
                     <Input
@@ -111,7 +256,7 @@ const Admin = () => {
                   <Button 
                     onClick={handleDeposit} 
                     className="w-full bg-green-600 hover:bg-green-700"
-                    disabled={!depositAmount || !accountNumber || !description}
+                    disabled={!depositAmount || !selectedUser || !description}
                   >
                     Deposit Funds
                   </Button>

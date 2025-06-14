@@ -9,24 +9,74 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          recipient_account_number: number | null
+          type: string
+          user_id: number | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          recipient_account_number?: number | null
+          type: string
+          user_id?: number | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          recipient_account_number?: number | null
+          type?: string
+          user_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "Users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Users: {
         Row: {
+          "account number": number | null
+          account_number: number | null
           balance: number | null
           created_at: string
           id: number
           Name: string | null
+          password: string | null
+          passwords: number | null
         }
         Insert: {
+          "account number"?: number | null
+          account_number?: number | null
           balance?: number | null
           created_at?: string
           id?: number
           Name?: string | null
+          password?: string | null
+          passwords?: number | null
         }
         Update: {
+          "account number"?: number | null
+          account_number?: number | null
           balance?: number | null
           created_at?: string
           id?: number
           Name?: string | null
+          password?: string | null
+          passwords?: number | null
         }
         Relationships: []
       }
