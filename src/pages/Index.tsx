@@ -1,6 +1,5 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
 import BankingHeader from '@/components/BankingHeader';
 import BalanceCard from '@/components/BalanceCard';
 import QuickStats from '@/components/QuickStats';
@@ -52,10 +51,6 @@ const Index = () => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
       <BankingHeader 
@@ -89,7 +84,7 @@ const Index = () => {
 
       <PasswordModal
         isOpen={showPasswordModal}
-        onClose={cancelTransaction}
+        onCancel={cancelTransaction}
         onConfirm={verifyPassword}
         password={password}
         setPassword={setPassword}
