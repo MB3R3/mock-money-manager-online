@@ -7,40 +7,59 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Banknote, Lock } from "lucide-react";
+import { Banknote, UserPlus } from "lucide-react";
 
-const Login = () => {
-  const [accountNumber, setAccountNumber] = useState('');
+const Register = () => {
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!accountNumber || !password) {
+    if (!name || !password || !confirmPassword) {
       toast({
         title: "Missing Information",
-        description: "Please enter both account number and password.",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 6 characters long.",
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    const result = await login(accountNumber, password);
+    const result = await register(name, password);
     
     if (result.success) {
       toast({
-        title: "Login Successful",
-        description: "Welcome to your banking dashboard!",
+        title: "Registration Successful",
+        description: `Account created! Your account number is ${result.accountNumber}. Please save this number for login.`,
       });
-      navigate('/');
+      navigate('/login');
     } else {
       toast({
-        title: "Login Failed",
-        description: result.error || "Please check your credentials and try again.",
+        title: "Registration Failed",
+        description: result.error || "Please try again.",
         variant: "destructive",
       });
     }
@@ -58,22 +77,22 @@ const Login = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Banking Login
+            Create Banking Account
           </CardTitle>
           <CardDescription>
-            Enter your account number and password to access your account
+            Register for a new banking account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="accountNumber">Account Number</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
-                id="accountNumber"
-                type="number"
-                placeholder="Enter your account number"
-                value={accountNumber}
-                onChange={(e) => setAccountNumber(e.target.value)}
+                id="name"
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="mt-1"
                 disabled={isLoading}
               />
@@ -83,9 +102,21 @@ const Login = () => {
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="mt-1"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="mt-1"
                 disabled={isLoading}
               />
@@ -98,12 +129,12 @@ const Login = () => {
               {isLoading ? (
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Signing In...</span>
+                  <span>Creating Account...</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <Lock className="h-4 w-4" />
-                  <span>Sign In</span>
+                  <UserPlus className="h-4 w-4" />
+                  <span>Create Account</span>
                 </div>
               )}
             </Button>
@@ -111,20 +142,11 @@ const Login = () => {
           
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 hover:underline">
-                Register here
+              Already have an account?{' '}
+              <Link to="/login" className="text-blue-600 hover:underline">
+                Sign in here
               </Link>
             </p>
-          </div>
-          
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold text-sm text-gray-700 mb-2">Demo Accounts:</h3>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div>Account: 1001, Password: password123</div>
-              <div>Account: 1002, Password: password456</div>
-              <div>Admin: 9999, Password: admin123</div>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -132,4 +154,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
