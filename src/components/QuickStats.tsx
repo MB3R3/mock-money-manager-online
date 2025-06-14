@@ -1,15 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-
-interface Transaction {
-  id: string;
-  type: 'deposit' | 'withdrawal' | 'transfer';
-  amount: number;
-  date: string;
-  time: string;
-  description: string;
-}
+import { Transaction } from '@/types';
 
 interface QuickStatsProps {
   transactions: Transaction[];

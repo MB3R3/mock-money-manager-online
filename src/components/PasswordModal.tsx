@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock } from "lucide-react";
+import { PendingTransaction } from '@/types';
 
 interface PasswordModalProps {
   isOpen: boolean;
@@ -12,7 +13,7 @@ interface PasswordModalProps {
   setPassword: (value: string) => void;
   onConfirm: () => void;
   onCancel: () => void;
-  pendingTransaction: {type: 'deposit' | 'withdrawal', amount: number} | null;
+  pendingTransaction: PendingTransaction | null;
   isDarkMode: boolean;
 }
 

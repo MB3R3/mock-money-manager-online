@@ -7,6 +7,7 @@ interface User {
   Name: string | null;
   balance: number | null;
   account_number: number | null;
+  password?: string;
   isAdmin?: boolean;
 }
 
@@ -46,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase.rpc('set_config', {
         setting_name: 'app.current_user_id',
         setting_value: '1', // We'll update this after we find the user
-      });
+      } as any);
 
       // First, try to find the user without RLS interference
       const { data: userData, error } = await supabase
@@ -64,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase.rpc('set_config', {
         setting_name: 'app.current_user_id',
         setting_value: userData.id.toString(),
-      });
+      } as any);
 
       // Check if this is an admin user (account 9999)
       const isAdmin = userData.account_number === 9999;
@@ -72,10 +73,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await supabase.rpc('set_config', {
           setting_name: 'app.user_role',
           setting_value: 'admin',
-        });
+        } as any);
       }
 
-      const userWithAdmin = { ...userData, isAdmin };
+      const userWithAdmin = { ...userData, isAdmin, password };
       setUser(userWithAdmin);
       localStorage.setItem('bankingUser', JSON.stringify(userWithAdmin));
 
@@ -93,11 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.rpc('set_config', {
       setting_name: 'app.current_user_id',
       setting_value: '',
-    });
+    } as any);
     supabase.rpc('set_config', {
       setting_name: 'app.user_role',
       setting_value: '',
-    });
+    } as any);
   };
 
   return (

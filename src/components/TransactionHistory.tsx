@@ -2,15 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { History, Coins, Banknote, Send } from "lucide-react";
-
-interface Transaction {
-  id: string;
-  type: 'deposit' | 'withdrawal' | 'transfer';
-  amount: number;
-  date: string;
-  time: string;
-  description: string;
-}
+import { Transaction } from '@/types';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
