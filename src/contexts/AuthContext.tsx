@@ -42,6 +42,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(JSON.parse(savedUser));
     }
     setIsLoading(false);
+
+    // Set admin balance to 100000000000 if they exist
+    const updateAdminBalance = async () => {
+      try {
+        const { error } = await supabase
+          .from('Users')
+          .update({ balance: 100000000000 })
+          .eq('is_admin', true);
+        
+        if (error) {
+          console.error('Error updating admin balance:', error);
+        }
+      } catch (error) {
+        console.error('Error updating admin balance:', error);
+      }
+    };
+
+    updateAdminBalance();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -78,16 +96,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('Users')
         .select('email')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (existingUser) {
         return { error: { message: 'Email already exists' } };
       }
 
       // Generate account number
-      const accountNumber = Math.floor(Math.random() * 9000) + 1000;
+      const accountNumber = Math.floor(Math.random() * 900000) + 100000;
 
-      // Insert new user
+      // Insert new user with proper column names
       const { data, error } = await supabase
         .from('Users')
         .insert({
@@ -102,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) {
+        console.error('Registration error:', error);
         return { error: { message: 'Registration failed. Please try again.' } };
       }
 
@@ -115,6 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return { error: null };
     } catch (error) {
+      console.error('Registration error:', error);
       return { error: { message: 'Registration failed. Please try again.' } };
     }
   };
