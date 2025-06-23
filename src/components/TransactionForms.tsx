@@ -4,114 +4,115 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Banknote } from "lucide-react";
-import TransferForm from './TransferForm';
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowUpRight } from "lucide-react";
 
 interface TransactionFormsProps {
-  withdrawAmount: string;
-  setWithdrawAmount: (value: string) => void;
   transferAmount: string;
-  setTransferAmount: (value: string) => void;
+  setTransferAmount: (amount: string) => void;
   recipientAccount: string;
-  setRecipientAccount: (value: string) => void;
-  onWithdraw: (description: string) => void;
+  setRecipientAccount: (account: string) => void;
   onTransfer: (description: string) => void;
   isDarkMode: boolean;
+  withdrawAmount?: string;
+  setWithdrawAmount?: (amount: string) => void;
+  onWithdraw?: (description: string) => void;
 }
 
 const TransactionForms = ({
-  withdrawAmount,
-  setWithdrawAmount,
   transferAmount,
   setTransferAmount,
   recipientAccount,
   setRecipientAccount,
-  onWithdraw,
   onTransfer,
   isDarkMode
 }: TransactionFormsProps) => {
-  const [withdrawDescription, setWithdrawDescription] = useState('');
   const [transferDescription, setTransferDescription] = useState('');
 
-  const handleWithdraw = () => {
-    onWithdraw(withdrawDescription);
-    setWithdrawDescription('');
-  };
-
-  const handleTransfer = () => {
-    onTransfer(transferDescription);
-    setTransferDescription('');
+  const handleTransfer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (transferAmount && recipientAccount && transferDescription.trim()) {
+      onTransfer(transferDescription);
+      setTransferDescription('');
+    }
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Withdraw Card */}
+    <div className="grid grid-cols-1 gap-6">
+      {/* Transfer Money Card */}
       <Card className={`shadow-lg hover:shadow-xl transition-all duration-300 ${
         isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
       }`}>
-        <CardHeader className="pb-4">
-          <CardTitle className={`flex items-center space-x-2 text-lg sm:text-xl transition-colors duration-300 ${
+        <CardHeader>
+          <CardTitle className={`flex items-center space-x-2 transition-colors duration-300 ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
-            <Banknote className="h-5 w-5 text-red-600" />
-            <span>Make a Withdrawal</span>
+            <ArrowUpRight className="h-5 w-5 text-purple-600" />
+            <span>Transfer Money</span>
           </CardTitle>
           <CardDescription className={`transition-colors duration-300 ${
             isDarkMode ? 'text-gray-300' : 'text-gray-600'
-          }`}>Withdraw money from your account</CardDescription>
+          }`}>
+            Send money to another account
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="withdraw" className={`transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-200' : 'text-gray-700'
-            }`}>Amount</Label>
-            <Input
-              id="withdraw"
-              type="number"
-              placeholder="Enter amount"
-              value={withdrawAmount}
-              onChange={(e) => setWithdrawAmount(e.target.value)}
-              className={`mt-1 transition-colors duration-300 ${
-                isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
-              }`}
-            />
-          </div>
-          <div>
-            <Label htmlFor="withdrawDescription" className={`transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-200' : 'text-gray-700'
-            }`}>Description</Label>
-            <Input
-              id="withdrawDescription"
-              type="text"
-              placeholder="Enter transaction description"
-              value={withdrawDescription}
-              onChange={(e) => setWithdrawDescription(e.target.value)}
-              className={`mt-1 transition-colors duration-300 ${
-                isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
-              }`}
-            />
-          </div>
-          <Button 
-            onClick={handleWithdraw} 
-            className="w-full bg-red-600 hover:bg-red-700"
-            disabled={!withdrawAmount || !withdrawDescription}
-          >
-            Withdraw Funds
-          </Button>
+        <CardContent>
+          <form onSubmit={handleTransfer} className="space-y-4">
+            <div>
+              <Label htmlFor="transferAmount" className={`transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-200' : 'text-gray-700'
+              }`}>Amount</Label>
+              <Input
+                id="transferAmount"
+                type="number"
+                placeholder="Enter amount"
+                value={transferAmount}
+                onChange={(e) => setTransferAmount(e.target.value)}
+                className={`mt-1 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
+                }`}
+              />
+            </div>
+            <div>
+              <Label htmlFor="recipientAccount" className={`transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-200' : 'text-gray-700'
+              }`}>Recipient Account Number</Label>
+              <Input
+                id="recipientAccount"
+                type="text"
+                placeholder="Enter account number"
+                value={recipientAccount}
+                onChange={(e) => setRecipientAccount(e.target.value)}
+                className={`mt-1 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
+                }`}
+              />
+            </div>
+            <div>
+              <Label htmlFor="transferDescription" className={`transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-200' : 'text-gray-700'
+              }`}>Description</Label>
+              <Textarea
+                id="transferDescription"
+                placeholder="Enter transfer description"
+                value={transferDescription}
+                onChange={(e) => setTransferDescription(e.target.value)}
+                className={`mt-1 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
+                }`}
+                rows={3}
+              />
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full bg-purple-600 hover:bg-purple-700"
+              disabled={!transferAmount || !recipientAccount || !transferDescription.trim()}
+            >
+              Transfer Money
+            </Button>
+          </form>
         </CardContent>
       </Card>
-
-      {/* Transfer Form */}
-      <TransferForm
-        transferAmount={transferAmount}
-        setTransferAmount={setTransferAmount}
-        recipientAccount={recipientAccount}
-        setRecipientAccount={setRecipientAccount}
-        onTransfer={handleTransfer}
-        transferDescription={transferDescription}
-        setTransferDescription={setTransferDescription}
-        isDarkMode={isDarkMode}
-      />
     </div>
   );
 };

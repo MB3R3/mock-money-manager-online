@@ -20,8 +20,6 @@ export const useTransactionHandler = ({
   balance,
   setBalance,
   loadTransactions,
-  withdrawAmount,
-  setWithdrawAmount,
   transferAmount,
   setTransferAmount,
   setRecipientAccount
@@ -31,7 +29,7 @@ export const useTransactionHandler = ({
   const [password, setPassword] = useState('');
   const [pendingTransaction, setPendingTransaction] = useState<PendingTransaction | null>(null);
 
-  const initiateTransaction = (type: 'withdrawal' | 'transfer', amount: string, description: string, recipientAccount?: string) => {
+  const initiateTransaction = (type: 'transfer', amount: string, description: string, recipientAccount?: string) => {
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       toast({
@@ -88,7 +86,6 @@ export const useTransactionHandler = ({
     const { type, amount, recipientAccount, description } = pendingTransaction;
 
     try {
-      // Create transaction record
       const { error: transactionError } = await supabase
         .from('transactions')
         .insert({
@@ -109,7 +106,6 @@ export const useTransactionHandler = ({
         return;
       }
 
-      // Update user balance
       const newBalance = balance - amount;
       const { error: balanceError } = await supabase
         .from('Users')
@@ -128,17 +124,13 @@ export const useTransactionHandler = ({
 
       setBalance(newBalance);
       
-      if (type === 'withdrawal') {
-        setWithdrawAmount('');
-      } else if (type === 'transfer') {
+      if (type === 'transfer') {
         setTransferAmount('');
         setRecipientAccount('');
       }
 
       let successMessage = '';
-      if (type === 'withdrawal') {
-        successMessage = `$${amount.toFixed(2)} has been withdrawn from your account.`;
-      } else if (type === 'transfer') {
+      if (type === 'transfer') {
         successMessage = `$${amount.toFixed(2)} has been transferred to account ****${recipientAccount?.slice(-4)}.`;
       }
 
@@ -158,7 +150,6 @@ export const useTransactionHandler = ({
       });
     }
 
-    // Reset modal state
     setShowPasswordModal(false);
     setPassword('');
     setPendingTransaction(null);
@@ -168,10 +159,6 @@ export const useTransactionHandler = ({
     setShowPasswordModal(false);
     setPassword('');
     setPendingTransaction(null);
-  };
-
-  const handleWithdraw = (description: string) => {
-    initiateTransaction('withdrawal', withdrawAmount, description);
   };
 
   const handleTransfer = (description: string) => {
@@ -185,7 +172,6 @@ export const useTransactionHandler = ({
     pendingTransaction,
     verifyPassword,
     cancelTransaction,
-    handleWithdraw,
     handleTransfer
   };
 };

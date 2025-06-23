@@ -53,7 +53,9 @@ export type Database = {
           account_number: number | null
           balance: number | null
           created_at: string
+          email: string | null
           id: number
+          is_admin: boolean | null
           Name: string | null
           password: string | null
           passwords: number | null
@@ -63,7 +65,9 @@ export type Database = {
           account_number?: number | null
           balance?: number | null
           created_at?: string
+          email?: string | null
           id?: number
+          is_admin?: boolean | null
           Name?: string | null
           password?: string | null
           passwords?: number | null
@@ -73,7 +77,9 @@ export type Database = {
           account_number?: number | null
           balance?: number | null
           created_at?: string
+          email?: string | null
           id?: number
+          is_admin?: boolean | null
           Name?: string | null
           password?: string | null
           passwords?: number | null

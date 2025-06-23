@@ -19,7 +19,6 @@ const Index = () => {
   const { balance, setBalance } = useBalance();
   const { transactions, loadTransactions } = useTransactions();
   
-  const [withdrawAmount, setWithdrawAmount] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [recipientAccount, setRecipientAccount] = useState('');
 
@@ -30,14 +29,13 @@ const Index = () => {
     pendingTransaction,
     verifyPassword,
     cancelTransaction,
-    handleWithdraw,
     handleTransfer
   } = useTransactionHandler({
     balance,
     setBalance,
     loadTransactions,
-    withdrawAmount,
-    setWithdrawAmount,
+    withdrawAmount: '',
+    setWithdrawAmount: () => {},
     transferAmount,
     setTransferAmount,
     setRecipientAccount
@@ -65,13 +63,10 @@ const Index = () => {
             <BalanceCard balance={balance} />
             <QuickStats transactions={transactions} isDarkMode={isDarkMode} />
             <TransactionForms 
-              withdrawAmount={withdrawAmount}
-              setWithdrawAmount={setWithdrawAmount}
               transferAmount={transferAmount}
               setTransferAmount={setTransferAmount}
               recipientAccount={recipientAccount}
               setRecipientAccount={setRecipientAccount}
-              onWithdraw={handleWithdraw}
               onTransfer={handleTransfer}
               isDarkMode={isDarkMode}
             />
@@ -88,9 +83,8 @@ const Index = () => {
         onConfirm={verifyPassword}
         password={password}
         setPassword={setPassword}
-        transactionType={pendingTransaction?.type || 'withdrawal'}
-        amount={pendingTransaction?.amount || 0}
-        recipientAccount={pendingTransaction?.recipientAccount}
+        pendingTransaction={pendingTransaction}
+        isDarkMode={isDarkMode}
       />
     </div>
   );
