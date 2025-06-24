@@ -29,6 +29,7 @@ const Register = () => {
     const { error } = await register(email, password, name);
     
     if (!error) {
+      // Redirect to home page after successful registration
       navigate('/');
     }
     

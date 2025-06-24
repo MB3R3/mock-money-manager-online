@@ -10,7 +10,7 @@ export interface Transaction {
 }
 
 export interface PendingTransaction {
-  type: 'transfer';
+  type: 'transfer' | 'deposit';
   amount: number;
   recipientAccount?: string;
   description: string;

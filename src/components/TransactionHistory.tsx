@@ -62,6 +62,14 @@ const TransactionHistory = ({ transactions, isDarkMode }: TransactionHistoryProp
     }
   };
 
+  const formatDescription = (description: string) => {
+    // Remove "admin deposit" from the description and clean it up
+    return description
+      .replace(/admin deposit/i, '')
+      .replace(/^[^\w]*/, '') // Remove leading non-word characters
+      .trim() || 'Deposit';
+  };
+
   return (
     <Card className={`shadow-lg transition-all duration-300 ${
       isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
@@ -101,7 +109,7 @@ const TransactionHistory = ({ transactions, isDarkMode }: TransactionHistoryProp
                     <div className={`font-medium transition-colors duration-300 ${
                       isDarkMode ? 'text-white' : 'text-gray-900'
                     }`}>
-                      {transaction.description}
+                      {formatDescription(transaction.description)}
                     </div>
                     <div className={`text-sm transition-colors duration-300 ${
                       isDarkMode ? 'text-gray-400' : 'text-gray-500'

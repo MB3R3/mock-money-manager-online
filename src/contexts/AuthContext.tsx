@@ -102,17 +102,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error: { message: 'Email already exists' } };
       }
 
-      // Generate account number
-      const accountNumber = Math.floor(Math.random() * 900000) + 100000;
-
-      // Insert new user with proper column names
+      // Insert new user - the trigger will automatically assign a unique 10-digit account number
       const { data, error } = await supabase
         .from('Users')
         .insert({
           Name: name,
           email: email,
           password: password,
-          account_number: accountNumber,
           balance: 0,
           is_admin: false
         })

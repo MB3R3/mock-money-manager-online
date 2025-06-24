@@ -29,7 +29,7 @@ export const useTransactionHandler = ({
   const [password, setPassword] = useState('');
   const [pendingTransaction, setPendingTransaction] = useState<PendingTransaction | null>(null);
 
-  const initiateTransaction = (type: 'transfer', amount: string, description: string, recipientAccount?: string) => {
+  const initiateTransaction = (type: 'transfer' | 'deposit', amount: string, description: string, recipientAccount?: string) => {
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       toast({
@@ -40,7 +40,7 @@ export const useTransactionHandler = ({
       return;
     }
 
-    if (parsedAmount > balance) {
+    if (type === 'transfer' && parsedAmount > balance) {
       toast({
         title: "Insufficient Funds",
         description: "You don't have enough balance for this transaction.",
@@ -106,7 +106,9 @@ export const useTransactionHandler = ({
         return;
       }
 
-      const newBalance = balance - amount;
+      // For deposits, add to balance; for transfers, subtract from balance
+      const newBalance = type === 'deposit' ? balance + amount : balance - amount;
+      
       const { error: balanceError } = await supabase
         .from('Users')
         .update({ balance: newBalance })
@@ -132,6 +134,8 @@ export const useTransactionHandler = ({
       let successMessage = '';
       if (type === 'transfer') {
         successMessage = `$${amount.toFixed(2)} has been transferred to account ****${recipientAccount?.slice(-4)}.`;
+      } else if (type === 'deposit') {
+        successMessage = `$${amount.toFixed(2)} has been deposited to your account.`;
       }
 
       toast({
@@ -165,6 +169,10 @@ export const useTransactionHandler = ({
     initiateTransaction('transfer', transferAmount, description, undefined);
   };
 
+  const handleDeposit = (amount: string, description: string) => {
+    initiateTransaction('deposit', amount, description);
+  };
+
   return {
     showPasswordModal,
     password,
@@ -172,6 +180,7 @@ export const useTransactionHandler = ({
     pendingTransaction,
     verifyPassword,
     cancelTransaction,
-    handleTransfer
+    handleTransfer,
+    handleDeposit
   };
 };
