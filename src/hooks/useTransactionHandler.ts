@@ -29,7 +29,7 @@ export const useTransactionHandler = ({
   const [password, setPassword] = useState('');
   const [pendingTransaction, setPendingTransaction] = useState<PendingTransaction | null>(null);
 
-  const initiateTransaction = (type: 'transfer' | 'deposit', amount: string, description: string, recipientAccount?: string) => {
+  const initiateTransaction = async (type: 'transfer' | 'deposit', amount: string, description: string, recipientAccount?: string) => {
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       toast({
@@ -56,6 +56,44 @@ export const useTransactionHandler = ({
         variant: "destructive",
       });
       return;
+    }
+
+    // Validate recipient account exists for transfers
+    if (type === 'transfer' && recipientAccount) {
+      const { data: recipientUser, error } = await supabase
+        .from('Users')
+        .select('id, account_number')
+        .eq('account_number', parseInt(recipientAccount))
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking recipient account:', error);
+        toast({
+          title: "Error",
+          description: "Error validating recipient account.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!recipientUser) {
+        toast({
+          title: "Invalid Account Number",
+          description: "The recipient account number does not exist.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if user is trying to transfer to their own account
+      if (recipientUser.account_number === user?.account_number) {
+        toast({
+          title: "Invalid Transfer",
+          description: "You cannot transfer money to your own account.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     if (!description.trim()) {
@@ -122,6 +160,38 @@ export const useTransactionHandler = ({
           variant: "destructive",
         });
         return;
+      }
+
+      // If it's a transfer, also add the amount to the recipient's balance
+      if (type === 'transfer' && recipientAccount) {
+        const { data: recipientUser } = await supabase
+          .from('Users')
+          .select('balance')
+          .eq('account_number', parseInt(recipientAccount))
+          .single();
+
+        if (recipientUser) {
+          const recipientNewBalance = (recipientUser.balance || 0) + amount;
+          
+          await supabase
+            .from('Users')
+            .update({ balance: recipientNewBalance })
+            .eq('account_number', parseInt(recipientAccount));
+
+          // Create a deposit transaction for the recipient
+          await supabase
+            .from('transactions')
+            .insert({
+              user_id: (await supabase
+                .from('Users')
+                .select('id')
+                .eq('account_number', parseInt(recipientAccount))
+                .single()).data?.id,
+              type: 'deposit',
+              amount,
+              description: `Transfer received from account ****${user.account_number?.toString().slice(-4)}`
+            });
+        }
       }
 
       setBalance(newBalance);

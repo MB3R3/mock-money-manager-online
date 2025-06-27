@@ -80,12 +80,13 @@ const TransactionForms = ({
               <Input
                 id="recipientAccount"
                 type="text"
-                placeholder="Enter account number"
+                placeholder="Enter 10-digit account number"
                 value={recipientAccount}
                 onChange={(e) => setRecipientAccount(e.target.value)}
                 className={`mt-1 transition-colors duration-300 ${
                   isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''
                 }`}
+                maxLength={10}
               />
             </div>
             <div>
