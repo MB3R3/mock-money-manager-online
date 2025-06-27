@@ -12,7 +12,7 @@ interface TransactionFormsProps {
   setTransferAmount: (amount: string) => void;
   recipientAccount: string;
   setRecipientAccount: (account: string) => void;
-  onTransfer: (description: string) => void;
+  onTransfer: (description: string, recipientAccount: string) => void;
   isDarkMode: boolean;
   withdrawAmount?: string;
   setWithdrawAmount?: (amount: string) => void;
@@ -32,7 +32,7 @@ const TransactionForms = ({
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
     if (transferAmount && recipientAccount && transferDescription.trim()) {
-      onTransfer(transferDescription);
+      onTransfer(transferDescription, recipientAccount);
       setTransferDescription('');
     }
   };

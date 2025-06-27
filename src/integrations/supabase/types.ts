@@ -49,7 +49,6 @@ export type Database = {
       }
       Users: {
         Row: {
-          "account number": number | null
           account_number: number | null
           balance: number | null
           created_at: string
@@ -58,10 +57,8 @@ export type Database = {
           is_admin: boolean | null
           Name: string | null
           password: string | null
-          passwords: number | null
         }
         Insert: {
-          "account number"?: number | null
           account_number?: number | null
           balance?: number | null
           created_at?: string
@@ -70,10 +67,8 @@ export type Database = {
           is_admin?: boolean | null
           Name?: string | null
           password?: string | null
-          passwords?: number | null
         }
         Update: {
-          "account number"?: number | null
           account_number?: number | null
           balance?: number | null
           created_at?: string
@@ -82,7 +77,6 @@ export type Database = {
           is_admin?: boolean | null
           Name?: string | null
           password?: string | null
-          passwords?: number | null
         }
         Relationships: []
       }

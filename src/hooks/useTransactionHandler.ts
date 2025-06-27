@@ -235,8 +235,8 @@ export const useTransactionHandler = ({
     setPendingTransaction(null);
   };
 
-  const handleTransfer = (description: string) => {
-    initiateTransaction('transfer', transferAmount, description, undefined);
+  const handleTransfer = (description: string, recipientAccount: string) => {
+    initiateTransaction('transfer', transferAmount, description, recipientAccount);
   };
 
   const handleDeposit = (amount: string, description: string) => {
