@@ -50,7 +50,7 @@ const Index = () => {
   }
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen max-w-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
       <BankingHeader 
         toggleDarkMode={toggleDarkMode} 
         isDarkMode={isDarkMode} 
@@ -60,7 +60,7 @@ const Index = () => {
         <WelcomeMessage />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <BalanceCard balance={balance} />
+            <BalanceCard balance={balance} accountNumber={user.account_number}/>
             <QuickStats transactions={transactions} isDarkMode={isDarkMode} />
             <TransactionForms 
               transferAmount={transferAmount}

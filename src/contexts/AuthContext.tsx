@@ -110,7 +110,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: email,
           password: password,
           balance: 0,
-          is_admin: false
+          is_admin: false,
+          account_number: generateAccountNumber()
         })
         .select()
         .single();
@@ -146,4 +147,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </AuthContext.Provider>
   );
+};
+
+
+const generateAccountNumber = () => {
+  return Math.floor(1000000000 + Math.random() * 9000000000).toString();
 };
