@@ -13,6 +13,15 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useTransactionHandler } from '@/hooks/useTransactionHandler';
 import { useState } from 'react';
 
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  else if (hour < 18) return 'Good afternoon';
+  else return 'Good evening';
+};
+
+
 const Index = () => {
   const { user, isLoading, logout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -58,10 +67,37 @@ const Index = () => {
       />
       <main className="container mx-auto p-6">
         <WelcomeMessage />
+        <h2 className={`text-xl font-medium mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+          {getGreeting()}, {user?.Name || 'User'} 👋
+        </h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <BalanceCard balance={balance} accountNumber={user.account_number}/>
-            <QuickStats transactions={transactions} isDarkMode={isDarkMode} />
+            {/* <QuickStats transactions={transactions} isDarkMode={isDarkMode} /> */}
+            <div className="space-y-4">
+              <div className={`p-6 rounded-xl shadow-md space-y-4 ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+                <h2 className="text-lg font-semibold border-b pb-2 mb-4">
+                  Loans and Lines of Credit
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Credit Score Box */}
+                  <div className={`border rounded-lg p-4 ${isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-gray-50'}`}>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Credit Score</h3>
+                    <p className="text-2xl font-bold text-green-500">750</p>
+                    <p className="text-sm text-gray-400 mt-1">Based on recent credit activity</p>
+                  </div>
+
+                  {/* Business Loan Box */}
+                  <div className={`border rounded-lg p-4 ${isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-gray-50'}`}>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Business Support Loan</h3>
+                    <p className="text-2xl font-bold text-blue-600">$600</p>
+                    <p className="text-sm text-gray-400 mt-1">Active loan – repayment begins next month</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
             <TransactionForms 
               transferAmount={transferAmount}
               setTransferAmount={setTransferAmount}
