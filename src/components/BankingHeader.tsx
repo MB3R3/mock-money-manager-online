@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, LogOut, User, Menu, X } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
+
 
 interface BankingHeaderProps {
   isDarkMode: boolean;
@@ -26,7 +28,8 @@ const BankingHeader = ({ isDarkMode, toggleDarkMode, onLogout }: BankingHeaderPr
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo and Brand */}
-          <div className="flex items-center space-x-3 min-w-0">
+          {/* Logo and Brand */}
+          <Link to="/" className="flex items-center space-x-3 min-w-0">
             <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
               <span className="text-white font-bold text-xl">💳</span>
             </div>
@@ -42,7 +45,8 @@ const BankingHeader = ({ isDarkMode, toggleDarkMode, onLogout }: BankingHeaderPr
                 Your trusted banking partner
               </p>
             </div>
-          </div>
+          </Link>
+
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">

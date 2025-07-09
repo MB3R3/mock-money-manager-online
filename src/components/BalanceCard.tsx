@@ -25,7 +25,7 @@ const BalanceCard = ({ balance, accountNumber }: BalanceCardProps) => {
         <CardDescription className="text-blue-100 text-sm sm:text-base">Checking Account {maskAccountNumber(accountNumber)}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl sm:text-4xl font-bold mb-2">${balance.toFixed(2)}</div>
+        <div className="text-3xl sm:text-4xl font-bold mb-2">${Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
         <div className="text-blue-100 text-sm">Available Balance</div>
       </CardContent>
     </Card>
