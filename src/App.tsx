@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Layout from "@/components/Layout";
 
 // Pages
 import Index from "./pages/Index";
@@ -32,16 +33,18 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Auth routes */}
+            {/* Auth routes - no layout needed */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* Protected routes */}
+            {/* Protected routes with layout */}
             <Route
               path="/"
               element={
                 <ProtectedRoute>
-                  <Index />
+                  <Layout>
+                    <Index />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -49,17 +52,21 @@ const App = () => (
               path="/admin"
               element={
                 <ProtectedRoute adminOnly>
-                  <Admin />
+                  <Layout>
+                    <Admin />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
 
-            {/* Sidebar Links */}
+            {/* Sidebar-linked pages with layout */}
             <Route
               path="/kyc-status"
               element={
                 <ProtectedRoute>
-                  <KycStatus />
+                  <Layout>
+                    <KycStatus />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -67,7 +74,9 @@ const App = () => (
               path="/local-transfer"
               element={
                 <ProtectedRoute>
-                  <LocalTransfer />
+                  <Layout>
+                    <LocalTransfer />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -75,7 +84,9 @@ const App = () => (
               path="/pay-bill"
               element={
                 <ProtectedRoute>
-                  <PayBill />
+                  <Layout>
+                    <PayBill />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -83,7 +94,9 @@ const App = () => (
               path="/virtual-cards"
               element={
                 <ProtectedRoute>
-                  <VirtualCards />
+                  <Layout>
+                    <VirtualCards />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -91,7 +104,9 @@ const App = () => (
               path="/account-summary"
               element={
                 <ProtectedRoute>
-                  <AccountSummary />
+                  <Layout>
+                    <AccountSummary />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -99,7 +114,9 @@ const App = () => (
               path="/my-account"
               element={
                 <ProtectedRoute>
-                  <MyAccount />
+                  <Layout>
+                    <MyAccount />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -107,7 +124,9 @@ const App = () => (
               path="/account-settings"
               element={
                 <ProtectedRoute>
-                  <AccountSettings />
+                  <Layout>
+                    <AccountSettings />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
