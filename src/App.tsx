@@ -13,10 +13,14 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import TransactionPage from "../src/pages/TransactionPage"
+import TransactionConfirmPage from "./pages/TransactionConfirmPage";
+import SuccessPage from "./pages/SuccessPage";
+import TransactionFailedPage from "./pages/TransactionFailedPage";
 
 // Sidebar Pages
 import KycStatus from "./pages/KycStatus";
-import LocalTransfer from "./pages/LocalTransfer";
+// import LocalTransfer from "./pages/LocalTransfer";
 import PayBill from "./pages/PayBill";
 import VirtualCards from "./pages/VirtualCards";
 import AccountSummary from "./pages/AccountSummary";
@@ -70,15 +74,15 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/local-transfer"
+            <Route 
+              path="/transactions" 
               element={
-                <ProtectedRoute>
-                  <Layout>
-                    <LocalTransfer />
-                  </Layout>
-                </ProtectedRoute>
-              }
+              <ProtectedRoute>
+                <Layout>
+                  <TransactionPage />
+                </Layout>
+              </ProtectedRoute>
+              } 
             />
             <Route
               path="/pay-bill"
@@ -120,6 +124,36 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route 
+              path="/transaction/confirm" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <TransactionConfirmPage />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+            path="/transaction-success" 
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SuccessPage />
+                </Layout>
+              </ProtectedRoute>
+              } 
+            />
+            <Route 
+            path="/transaction-failed" 
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TransactionFailedPage />
+                </Layout>
+              </ProtectedRoute>
+              } 
+            /> 
             <Route
               path="/account-settings"
               element={

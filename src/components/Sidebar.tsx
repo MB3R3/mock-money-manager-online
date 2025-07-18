@@ -87,7 +87,7 @@ const Sidebar = ({ isDarkMode, user }: SidebarProps) => {
       <Link to="/kyc-status" className={getLinkStyle('/kyc-status')}>
         <UserCheck className="w-5 h-5 mr-3" /> KYC Status
       </Link>
-      <Link to="/local-transfer" className={getLinkStyle('/local-transfer')}>
+      <Link to="/transactions" className={getLinkStyle('/transactions')}>
         <Send className="w-5 h-5 mr-3" /> Local Transfer
       </Link>
       <Link to="/pay-bill" className={getLinkStyle('/pay-bill')}>
