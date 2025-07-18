@@ -26,15 +26,13 @@ const TransactionConfirm = () => {
   };
 
   const handleConfirm = () => {
-    if (isEditing) {
-      // If in edit mode, don't confirm yet
-      alert('Please finish editing before confirming.');
-      return;
+    // Simulate confirmation logic here
+    const isSuccessful = true; // could simulate random failure if needed
+    if (isSuccessful) {
+      navigate('/transaction-success');
+    } else {
+      navigate('/transaction-failed');
     }
-
-    // Normally you'd send `transactionData` to a backend here.
-    // Simulate success and navigate
-    navigate('/transaction-success', { state: transactionData });
   };
 
   return (

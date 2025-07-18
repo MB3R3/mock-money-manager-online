@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 
+
 // Pages
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -17,6 +18,7 @@ import TransactionPage from "../src/pages/TransactionPage"
 import TransactionConfirmPage from "./pages/TransactionConfirmPage";
 import SuccessPage from "./pages/SuccessPage";
 import TransactionFailedPage from "./pages/TransactionFailedPage";
+import Transfer from '@/pages/Transfer';
 
 // Sidebar Pages
 import KycStatus from "./pages/KycStatus";
@@ -51,6 +53,17 @@ const App = () => (
                   </Layout>
                 </ProtectedRoute>
               }
+            />
+            <Route 
+              path="/transfer" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Transfer />
+                  </Layout>
+                </ProtectedRoute>
+
+              } 
             />
             <Route
               path="/admin"

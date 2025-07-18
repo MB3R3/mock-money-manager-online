@@ -11,6 +11,7 @@ import { useBalance } from '@/hooks/useBalance';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useTransactionHandler } from '@/hooks/useTransactionHandler';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Add this import
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -24,6 +25,7 @@ const Index = () => {
   const { isDarkMode } = useDarkMode();
   const { balance, setBalance } = useBalance();
   const { transactions, loadTransactions } = useTransactions();
+  const navigate = useNavigate(); // Add this hook
 
   const [transferAmount, setTransferAmount] = useState('');
   const [recipientAccount, setRecipientAccount] = useState('');
@@ -58,6 +60,10 @@ const Index = () => {
       });
   }, []);
 
+  const handleQuickTransfer = () => {
+    navigate('/transfer');
+  };
+
   return (
     <div className="container mx-auto p-4 sm:p-6">
       <WelcomeMessage />
@@ -80,6 +86,33 @@ const Index = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <BalanceCard balance={balance} accountNumber={user.account_number} />
+
+          {/* Quick Actions Section */}
+          <div className={`p-6 rounded-xl shadow-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+            <h2 className="text-lg font-semibold border-b pb-2 mb-4">
+              Quick Actions
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={handleQuickTransfer}
+                className="flex items-center justify-center p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                Quick Transfer
+              </button>
+              <button
+                onClick={() => setShowLoanModal(true)}
+                className="flex items-center justify-center p-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+                View Loans
+              </button>
+            </div>
+          </div>
 
           <div className="space-y-4">
             <div className={`p-6 rounded-xl shadow-md space-y-4 ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
