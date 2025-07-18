@@ -89,9 +89,9 @@ const Login = () => {
           </div>
 
           <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 font-medium mb-2">Demo Accounts:</p>
+            {/* <p className="text-xs text-gray-600 font-medium mb-2">Demo Accounts:</p>
             <p className="text-xs text-gray-500">User: john.doe@example.com / password123</p>
-            <p className="text-xs text-gray-500">Admin: admin@example.com / admin123</p>
+            <p className="text-xs text-gray-500">Admin: admin@example.com / admin123</p> */}
           </div>
         </CardContent>
       </Card>

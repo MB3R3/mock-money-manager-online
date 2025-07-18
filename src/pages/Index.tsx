@@ -90,7 +90,7 @@ const Index = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className={`border rounded-lg p-4 ${isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-gray-50'}`}>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Credit Score</h3>
-                  <p className="text-2xl font-bold text-green-500">750</p>
+                  <p className="text-2xl font-bold text-green-500">870</p>
                   <p className="text-sm text-gray-400 mt-1">Based on recent credit activity</p>
                 </div>
 
